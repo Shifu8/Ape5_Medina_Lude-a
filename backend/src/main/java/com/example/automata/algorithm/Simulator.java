@@ -23,9 +23,22 @@ public final class Simulator {
 
         for (String symbol : tokens) {
             Set<String> beforeStates = new LinkedHashSet<>(currentStates);
-            Set<Transition> usedTransitions = automaton.getTransitions().stream()
-                    .filter(t -> beforeStates.contains(t.getSource()) && t.getSymbol().equals(symbol))
-                    .collect(Collectors.toCollection(LinkedHashSet::new));
+            Set<Transition> usedTransitions = new LinkedHashSet<>();
+            Queue<String> queue = new ArrayDeque<>(beforeStates);
+            Set<String> visited = new HashSet<>(beforeStates);
+            while (!queue.isEmpty()) {
+                String state = queue.poll();
+                for (Transition t : automaton.getTransitions()) {
+                    if (t.getSource().equals(state)) {
+                        if (t.getSymbol().equals(symbol)) {
+                            usedTransitions.add(t);
+                        } else if (t.getSymbol().equals("ε") && !visited.contains(t.getTarget())) {
+                            visited.add(t.getTarget());
+                            queue.add(t.getTarget());
+                        }
+                    }
+                }
+            }
 
             Set<String> nextStates = usedTransitions.stream()
                     .map(Transition::getTarget)
@@ -58,10 +71,23 @@ public final class Simulator {
     }
 
     private static Set<String> move(Set<String> states, String symbol, Automaton automaton) {
-        return automaton.getTransitions().stream()
-                .filter(t -> states.contains(t.getSource()) && t.getSymbol().equals(symbol))
-                .map(Transition::getTarget)
-                .collect(Collectors.toSet());
+        Set<String> result = new HashSet<>();
+        Queue<String> queue = new ArrayDeque<>(states);
+        Set<String> visited = new HashSet<>(states);
+        while (!queue.isEmpty()) {
+            String state = queue.poll();
+            for (Transition t : automaton.getTransitions()) {
+                if (t.getSource().equals(state)) {
+                    if (t.getSymbol().equals(symbol)) {
+                        result.add(t.getTarget());
+                    } else if (t.getSymbol().equals("ε") && !visited.contains(t.getTarget())) {
+                        visited.add(t.getTarget());
+                        queue.add(t.getTarget());
+                    }
+                }
+            }
+        }
+        return epsilonClosure(result, automaton);
     }
 
     private static Set<String> epsilonClosure(Set<String> states, Automaton automaton) {

@@ -2,23 +2,19 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import GlassCard from '../ui/GlassCard';
 
-function SimulationPanel({ onSimulate, comparison, isLoading, error }) {
+function SimulationPanel({ onSimulate, simulationResult, isLoading, error, automaton, examples }) {
   const [input, setInput] = useState('');
-  const [stepIndex, setStepIndex] = useState(0);
 
   const handleSimulate = async () => {
     if (!input.trim()) return;
     await onSimulate(input);
-    setStepIndex(0);
   };
 
-  const stepCount = comparison
-    ? Math.max(comparison.afnd.steps.length, comparison.dfa.steps.length, comparison.minimized.steps.length)
-    : 0;
-
-  const getStep = (trace) => {
-    if (!trace || !trace.steps) return null;
-    return trace.steps[Math.min(stepIndex, trace.steps.length - 1)];
+  const getPlaceholder = () => {
+    if (examples.length > 0) {
+      return `ej: ${examples[0]}`;
+    }
+    return 'ej: aba (o separada por espacios)';
   };
 
   return (
@@ -30,7 +26,7 @@ function SimulationPanel({ onSimulate, comparison, isLoading, error }) {
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="ej: aba (o separada por espacios)"
+            placeholder={getPlaceholder()}
             className="flex-1 rounded-xl border border-slate-700 bg-slate-950/50 px-4 py-3 text-slate-100 placeholder-slate-600 outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 backdrop-blur-sm"
             onKeyPress={(e) => e.key === 'Enter' && handleSimulate()}
           />
@@ -52,154 +48,41 @@ function SimulationPanel({ onSimulate, comparison, isLoading, error }) {
         </motion.div>
       )}
 
-      {comparison && (
-        <>
-          {/* Control de pasos */}
-          <GlassCard title="Control de simulación" subtitle={`Paso ${Math.min(stepIndex + 1, stepCount)} de ${stepCount}`} icon="⏱️" gradient="from-green-500 to-emerald-500">
-            <div className="flex flex-wrap gap-3">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setStepIndex(0)}
-                disabled={stepIndex === 0}
-                className="rounded-xl border border-slate-700 bg-slate-900/50 px-4 py-2 text-sm font-medium text-slate-100 transition disabled:opacity-50 disabled:cursor-not-allowed hover:border-cyan-400/50 hover:bg-slate-800"
-              >
-                ⏮️ Inicio
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setStepIndex(Math.max(0, stepIndex - 1))}
-                disabled={stepIndex === 0}
-                className="rounded-xl border border-slate-700 bg-slate-900/50 px-4 py-2 text-sm font-medium text-slate-100 transition disabled:opacity-50 disabled:cursor-not-allowed hover:border-cyan-400/50 hover:bg-slate-800"
-              >
-                ◀️ Anterior
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setStepIndex(Math.min(stepCount - 1, stepIndex + 1))}
-                disabled={stepIndex >= stepCount - 1}
-                className="rounded-xl border border-slate-700 bg-slate-900/50 px-4 py-2 text-sm font-medium text-slate-100 transition disabled:opacity-50 disabled:cursor-not-allowed hover:border-cyan-400/50 hover:bg-slate-800"
-              >
-                Siguiente ▶️
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setStepIndex(stepCount - 1)}
-                disabled={stepIndex >= stepCount - 1}
-                className="rounded-xl border border-slate-700 bg-slate-900/50 px-4 py-2 text-sm font-medium text-slate-100 transition disabled:opacity-50 disabled:cursor-not-allowed hover:border-cyan-400/50 hover:bg-slate-800"
-              >
-                Final ⏭️
-              </motion.button>
+      {simulationResult !== null && (
+        <GlassCard title="Resultado" subtitle="Estado de la simulación" icon="✓" gradient="from-violet-500 to-purple-500">
+          <div className="text-center">
+            <div className={`inline-flex items-center gap-3 rounded-full px-6 py-3 text-lg font-bold ${
+              simulationResult.accepted
+                ? 'bg-green-500/20 text-green-300 border border-green-500/50'
+                : 'bg-red-500/20 text-red-300 border border-red-500/50'
+            }`}>
+              <span className="text-2xl">{simulationResult.accepted ? '✅' : '❌'}</span>
+              <span>{simulationResult.accepted ? 'Aceptada' : 'Rechazada'}</span>
             </div>
-          </GlassCard>
-
-          {/* Información de cadena */}
-          <GlassCard title="Resultado" subtitle="Aceptación de cadena" icon="✓" gradient="from-violet-500 to-purple-500">
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              <div className="rounded-2xl border border-slate-700/50 bg-slate-900/50 p-4 backdrop-blur-sm">
-                <p className="text-xs uppercase tracking-widest text-slate-400">Cadena</p>
-                <p className="mt-2 text-lg font-bold text-slate-100">{comparison.afnd.input}</p>
+            <p className="mt-4 text-sm text-slate-400">
+              {simulationResult.accepted 
+                ? `La cadena "${input}" fue aceptada por el autómata.`
+                : `La cadena "${input}" fue rechazada porque no lleva al estado final del autómata.`
+              }
+            </p>
+            {!simulationResult.accepted && examples.length > 0 && (
+              <div className="mt-4 p-4 bg-slate-800/50 rounded-xl">
+                <p className="text-sm text-slate-300 mb-2">Ejemplos de cadenas aceptadas:</p>
+                <div className="flex flex-wrap gap-2">
+                  {examples.map((example, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setInput(example)}
+                      className="px-3 py-1 bg-cyan-500/20 text-cyan-300 rounded-lg text-sm hover:bg-cyan-500/30 transition"
+                    >
+                      {example}
+                    </button>
+                  ))}
+                </div>
               </div>
-              <div className="rounded-2xl border border-slate-700/50 bg-slate-900/50 p-4 backdrop-blur-sm">
-                <p className="text-xs uppercase tracking-widest text-slate-400">Consistencia</p>
-                <p className={`mt-2 text-lg font-bold ${comparison.consistent ? 'text-green-400' : 'text-rose-400'}`}>
-                  {comparison.consistent ? '✓ Sí' : '✗ No'}
-                </p>
-              </div>
-              <div className="rounded-2xl border border-slate-700/50 bg-slate-900/50 p-4 backdrop-blur-sm">
-                <p className="text-xs uppercase tracking-widest text-slate-400">AFND</p>
-                <p className={`mt-2 text-lg font-bold ${comparison.afnd.accepted ? 'text-green-400' : 'text-slate-400'}`}>
-                  {comparison.afnd.accepted ? '✓ Acepta' : '✗ Rechaza'}
-                </p>
-              </div>
-              <div className="rounded-2xl border border-slate-700/50 bg-slate-900/50 p-4 backdrop-blur-sm">
-                <p className="text-xs uppercase tracking-widest text-slate-400">AFD Minimizado</p>
-                <p className={`mt-2 text-lg font-bold ${comparison.minimized.accepted ? 'text-green-400' : 'text-slate-400'}`}>
-                  {comparison.minimized.accepted ? '✓ Acepta' : '✗ Rechaza'}
-                </p>
-              </div>
-            </div>
-          </GlassCard>
-
-          {/* Traza paso a paso */}
-          <div className="grid gap-6 lg:grid-cols-3">
-            {['AFND', 'AFD', 'Minimizado'].map((name, idx) => {
-              const trace = name === 'AFND' ? comparison.afnd : name === 'AFD' ? comparison.dfa : comparison.minimized;
-              const step = getStep(trace);
-              const icons = ['🔌', '⚙️', '✨'];
-              return (
-                <motion.div
-                  key={name}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: idx * 0.1 }}
-                >
-                  <GlassCard title={name} subtitle={`Estado: ${step?.afterStates.join(', ') || 'Inicial'}`} icon={icons[idx]}>
-                    <div className="space-y-3 text-sm">
-                      <div>
-                        <p className="text-xs text-slate-500">Aceptada:</p>
-                        <p className={`font-semibold ${trace.accepted ? 'text-green-400' : 'text-slate-400'}`}>
-                          {trace.accepted ? '✓ Sí' : '✗ No'}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-slate-500">Estados iniciales:</p>
-                        <p className="font-mono text-xs text-cyan-300">{trace.initialStates.join(', ')}</p>
-                      </div>
-                      {step && (
-                        <>
-                          <div>
-                            <p className="text-xs text-slate-500">Símbolo procesado:</p>
-                            <p className="font-bold text-amber-300">{step.symbol}</p>
-                          </div>
-                          <div>
-                            <p className="text-xs text-slate-500">Antes:</p>
-                            <p className="font-mono text-xs text-slate-300">{step.beforeStates.join(', ')}</p>
-                          </div>
-                          <div>
-                            <p className="text-xs text-slate-500">Después:</p>
-                            <p className="font-mono text-xs text-cyan-300">{step.afterStates.join(', ')}</p>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  </GlassCard>
-                </motion.div>
-              );
-            })}
+            )}
           </div>
-
-          {/* Detalle de transiciones */}
-          {stepCount > 0 && (
-            <GlassCard title="Análisis del paso" subtitle={`Detalle de transiciones paso ${stepIndex + 1}`} icon="🔬" gradient="from-indigo-500 to-blue-500">
-              <div className="grid gap-4 lg:grid-cols-3">
-                {['AFND', 'AFD', 'Minimizado'].map((name, idx) => {
-                  const trace = name === 'AFND' ? comparison.afnd : name === 'AFD' ? comparison.dfa : comparison.minimized;
-                  const step = getStep(trace);
-                  return (
-                    <div key={name} className="rounded-2xl border border-slate-700/50 bg-slate-900/30 p-4 backdrop-blur-sm">
-                      <h4 className="mb-3 font-semibold text-slate-100">{name}</h4>
-                      {step && step.transitions.length > 0 ? (
-                        <ul className="space-y-2 text-xs">
-                          {step.transitions.map((trans, i) => (
-                            <li key={i} className="font-mono text-slate-300 break-all">
-                              <span className="text-cyan-400">{trans}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      ) : (
-                        <p className="text-xs text-slate-500">Sin transiciones en este paso</p>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </GlassCard>
-          )}
-        </>
+        </GlassCard>
       )}
     </div>
   );

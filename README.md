@@ -1,4 +1,4 @@
-# Práctica Universitaria de Teoría de Autómatas
+# Práctica de Teoría de Autómatas
 
 Proyecto con arquitectura limpia para conversión AFND → AFD, minimización, simulación y comparación de autómatas.
 

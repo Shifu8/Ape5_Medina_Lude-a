@@ -1,0 +1,68 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  @apply bg-slate-950 text-slate-100 min-h-screen;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+  background-attachment: fixed;
+}
+
+/* Scrollbar personalizado */
+::-webkit-scrollbar {
+  @apply w-2;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-slate-900;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-slate-700 rounded-full hover:bg-slate-600;
+}
+
+/* Animaciones suaves */
+* {
+  @apply transition-all duration-300;
+}
+
+button, input, textarea, select {
+  @apply rounded border border-slate-700 bg-slate-900 text-slate-100 outline-none focus:ring-2 focus:ring-cyan-400/50;
+}
+
+.btn-primary {
+  @apply inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 px-6 py-2 text-sm font-semibold text-slate-950 hover:from-cyan-400 hover:to-blue-400 shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/40;
+}
+
+.btn-secondary {
+  @apply inline-flex items-center justify-center rounded-xl border border-slate-700 bg-slate-800/50 px-6 py-2 text-sm font-semibold text-slate-100 hover:border-cyan-400/50 hover:bg-slate-700/50;
+}
+
+/* Glassmorphism base */
+.glass {
+  @apply backdrop-blur-xl bg-slate-900/30 border border-slate-700/50;
+}
+
+/* Gradientes de fondo */
+.gradient-cyan {
+  background: linear-gradient(135deg, rgba(34, 211, 238, 0.1), rgba(59, 130, 246, 0.05));
+}
+
+.gradient-purple {
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.1), rgba(236, 72, 153, 0.05));
+}
+
+/* Efectos de hover */
+.card-hover {
+  @apply transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/10 hover:border-cyan-400/50;
+}
+
+/* Texto con degradado */
+.text-gradient {
+  @apply bg-gradient-to-r bg-clip-text text-transparent;
+}

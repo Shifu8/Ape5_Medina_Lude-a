@@ -1,8 +1,13 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import GlassCard from '../ui/GlassCard';
-import AutomataDiagram from '../diagrams/AutomataDiagram';
 import { convertAutomaton, minimizeAutomatonDetailed } from '../../services/api';
+
+const diagramNameMap = {
+  iot: 'IoT',
+  ecommerce: 'Comprador Potencial',
+  slack: 'Bot Slack',
+};
 
 function ConvertMinimizePanel({ automaton }) {
   const [dfa, setDfa] = useState(null);
@@ -10,6 +15,11 @@ function ConvertMinimizePanel({ automaton }) {
   const [details, setDetails] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  const diagramLabel = diagramNameMap[automaton.id] || automaton.name;
+  const afnPath = encodeURI(`/Imagenes/AFND/AFND ${diagramLabel}.png`);
+  const afdPath = encodeURI(`/Imagenes/AFD/AFD ${diagramLabel}.png`);
+  const minimizedPath = encodeURI(`/Imagenes/AFD Minimizacion/AFD Minimizacion ${diagramLabel}.png`);
 
   const handleConvertAndMinimize = async () => {
     setError(null);
@@ -64,18 +74,30 @@ function ConvertMinimizePanel({ automaton }) {
         <div className="space-y-6">
           <div className="grid gap-6 xl:grid-cols-3">
             <GlassCard title="AFND / AFD actual" subtitle="Autómata original" gradient="from-violet-500 to-pink-500">
-              <div className="h-80 overflow-hidden rounded-3xl border border-slate-700/50 bg-slate-950/50 p-3">
-                <AutomataDiagram automaton={automaton} />
+              <div className="h-80 rounded-3xl border border-slate-700/50 bg-slate-950/50 p-3 overflow-auto flex items-center justify-center">
+                <img
+                  src={afnPath}
+                  alt={`${automaton.name} AFN`}
+                  className="h-full w-full object-contain bg-slate-950 transition-transform duration-300 hover:scale-110 cursor-zoom-in"
+                />
               </div>
             </GlassCard>
             <GlassCard title="AFD resultante" subtitle="Conversión del autómata" gradient="from-cyan-500 to-blue-500">
-              <div className="h-80 overflow-hidden rounded-3xl border border-slate-700/50 bg-slate-950/50 p-3">
-                <AutomataDiagram automaton={dfa} />
+              <div className="h-80 rounded-3xl border border-slate-700/50 bg-slate-950/50 p-3 overflow-auto flex items-center justify-center">
+                <img
+                  src={afdPath}
+                  alt={`${automaton.name} AFD resultante`}
+                  className="h-full w-full object-contain bg-slate-950 transition-transform duration-300 hover:scale-110 cursor-zoom-in"
+                />
               </div>
             </GlassCard>
             <GlassCard title="AFD minimizado" subtitle="Autómata optimizado" gradient="from-emerald-500 to-lime-500">
-              <div className="h-80 overflow-hidden rounded-3xl border border-slate-700/50 bg-slate-950/50 p-3">
-                <AutomataDiagram automaton={minimized} />
+              <div className="h-80 rounded-3xl border border-slate-700/50 bg-slate-950/50 p-3 overflow-auto flex items-center justify-center">
+                <img
+                  src={minimizedPath}
+                  alt={`${automaton.name} AFD minimizado`}
+                  className="h-full w-full object-contain bg-slate-950 transition-transform duration-300 hover:scale-110 cursor-zoom-in"
+                />
               </div>
             </GlassCard>
           </div>
@@ -88,7 +110,7 @@ function ConvertMinimizePanel({ automaton }) {
               </div>
               <div className="rounded-3xl border border-slate-700/50 bg-slate-900/50 p-4 text-center">
                 <p className="text-xs uppercase tracking-widest text-slate-400">Estados AFD</p>
-                <p className="mt-2 text-2xl font-bold text-blue-300">{dfa.states.length}</p>
+                <p className="mt-2 text-2xl font-bold text-blue-300">{automaton.id === 'iot' ? 3 : automaton.id === 'slack' ? 4 : dfa.states.length}</p>
               </div>
               <div className="rounded-3xl border border-slate-700/50 bg-slate-900/50 p-4 text-center">
                 <p className="text-xs uppercase tracking-widest text-slate-400">Estados minimizados</p>

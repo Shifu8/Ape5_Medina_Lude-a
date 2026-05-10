@@ -1,11 +1,19 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import GlassCard from '../ui/GlassCard';
-import AutomataDiagram from '../diagrams/AutomataDiagram';
+
+const diagramNameMap = {
+  iot: 'IoT',
+  ecommerce: 'Comprador Potencial',
+  slack: 'Bot Slack',
+};
 
 function MinimizationPanel({ automaton, onMinimize, isLoading }) {
   const [minimized, setMinimized] = useState(null);
   const [details, setDetails] = useState(null);
+  const diagramLabel = diagramNameMap[automaton.id] || automaton.name;
+  const originalDiagram = encodeURI(`/Imagenes/AFD/AFD ${diagramLabel}.png`);
+  const minimizedDiagram = encodeURI(`/Imagenes/AFD Minimizacion/AFD Minimizacion ${diagramLabel}.png`);
 
   const handleMinimize = async () => {
     const { minimized: min, details: det } = await onMinimize();
@@ -36,14 +44,22 @@ function MinimizationPanel({ automaton, onMinimize, isLoading }) {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
           <div className="grid gap-6 lg:grid-cols-2">
             <GlassCard title="AFD Original" subtitle="Antes de minimización" gradient="from-cyan-500 to-blue-500">
-              <div className="h-96 rounded-2xl border border-slate-700/50 bg-slate-950/50 overflow-hidden">
-                <AutomataDiagram automaton={automaton} />
+              <div className="h-96 rounded-2xl border border-slate-700/50 bg-slate-950/50 overflow-auto flex items-center justify-center">
+                <img
+                  src={originalDiagram}
+                  alt={`${automaton.name} AFD original`}
+                  className="h-full w-full object-contain bg-slate-950 transition-transform duration-300 hover:scale-110 cursor-zoom-in"
+                />
               </div>
             </GlassCard>
 
             <GlassCard title="AFD Minimizado" subtitle="Después de minimización" gradient="from-green-500 to-emerald-500">
-              <div className="h-96 rounded-2xl border border-slate-700/50 bg-slate-950/50 overflow-hidden">
-                <AutomataDiagram automaton={minimized} />
+              <div className="h-96 rounded-2xl border border-slate-700/50 bg-slate-950/50 overflow-auto flex items-center justify-center">
+                <img
+                  src={minimizedDiagram}
+                  alt={`${automaton.name} AFD minimizado`}
+                  className="h-full w-full object-contain bg-slate-950 transition-transform duration-300 hover:scale-110 cursor-zoom-in"
+                />
               </div>
             </GlassCard>
           </div>

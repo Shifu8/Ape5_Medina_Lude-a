@@ -1,10 +1,18 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import GlassCard from '../ui/GlassCard';
-import AutomataDiagram from '../diagrams/AutomataDiagram';
+
+const diagramNameMap = {
+  iot: 'IoT',
+  ecommerce: 'Comprador Potencial',
+  slack: 'Bot Slack',
+};
 
 function ConversionPanel({ automaton, onConvert, isLoading }) {
   const [converted, setConverted] = useState(null);
+  const diagramLabel = diagramNameMap[automaton.id] || automaton.name;
+  const originalDiagram = encodeURI(`/Imagenes/AFND/AFND ${diagramLabel}.png`);
+  const convertedDiagram = encodeURI(`/Imagenes/AFD/AFD ${diagramLabel}.png`);
 
   const handleConvert = async () => {
     const result = await onConvert();
@@ -34,14 +42,22 @@ function ConversionPanel({ automaton, onConvert, isLoading }) {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
           <div className="grid gap-6 lg:grid-cols-2">
             <GlassCard title="AFND Original" subtitle="Autómata no determinista" gradient="from-purple-500 to-pink-500">
-              <div className="h-96 rounded-2xl border border-slate-700/50 bg-slate-950/50 overflow-hidden">
-                <AutomataDiagram automaton={automaton} />
+              <div className="h-96 rounded-2xl border border-slate-700/50 bg-slate-950/50 overflow-auto flex items-center justify-center">
+                <img
+                  src={originalDiagram}
+                  alt={`${automaton.name} AFND`}
+                  className="h-full w-full object-contain bg-slate-950 transition-transform duration-300 hover:scale-110 cursor-zoom-in"
+                />
               </div>
             </GlassCard>
 
             <GlassCard title="AFD Resultante" subtitle="Autómata determinista equivalente" gradient="from-cyan-500 to-blue-500">
-              <div className="h-96 rounded-2xl border border-slate-700/50 bg-slate-950/50 overflow-hidden">
-                <AutomataDiagram automaton={converted} />
+              <div className="h-96 rounded-2xl border border-slate-700/50 bg-slate-950/50 overflow-auto flex items-center justify-center">
+                <img
+                  src={convertedDiagram}
+                  alt={`${automaton.name} AFD`}
+                  className="h-full w-full object-contain bg-slate-950 transition-transform duration-300 hover:scale-110 cursor-zoom-in"
+                />
               </div>
             </GlassCard>
           </div>

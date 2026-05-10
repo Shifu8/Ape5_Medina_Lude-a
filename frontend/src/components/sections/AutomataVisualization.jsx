@@ -1,9 +1,17 @@
 import React from 'react';
 import GlassCard from '../ui/GlassCard';
-import AutomataDiagram from '../diagrams/AutomataDiagram';
 import AutomataTable from '../tables/AutomataTable';
 
+const diagramNameMap = {
+  iot: 'AFND IoT',
+  ecommerce: 'AFND Comprador Potencial',
+  slack: 'AFND Bot Slack',
+};
+
 function AutomataVisualization({ automaton, title, subtitle, icon }) {
+  const diagramLabel = diagramNameMap[automaton.id] || automaton.name;
+  const diagramPath = encodeURI(`/Imagenes/AFND/${diagramLabel}.png`);
+
   return (
     <div className="space-y-6">
       <GlassCard title={title} subtitle={subtitle} icon={icon}>
@@ -22,8 +30,12 @@ function AutomataVisualization({ automaton, title, subtitle, icon }) {
 
       <div className="grid gap-6 lg:grid-cols-3">
         <GlassCard title="Diagrama" subtitle="Visualización del autómata" gradient="from-blue-500 to-purple-500">
-          <div className="h-96 rounded-2xl border border-slate-700/50 bg-slate-950/50 overflow-hidden">
-            <AutomataDiagram automaton={automaton} />
+          <div className="h-96 rounded-2xl border border-slate-700/50 bg-slate-950/50 overflow-auto flex items-center justify-center">
+            <img
+              src={diagramPath}
+              alt={`${automaton.name} AFN`}
+              className="h-full w-full object-contain bg-slate-950 transition-transform duration-300 hover:scale-110 cursor-zoom-in"
+            />
           </div>
         </GlassCard>
 
